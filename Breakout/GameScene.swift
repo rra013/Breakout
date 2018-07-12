@@ -22,19 +22,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var lives = 3
     var originalBricks = 0
     var colors = [UIColor.blue, UIColor.green, UIColor.yellow]
+    var playing = true
+    var resultLabel = SKLabelNode()
     
     override func didMove(to view: SKView) {
-        createBackGround()
-        makeBall()
-        makePaddle()
-        makeBricks()
-        makeLoseZone()
-        makeScoreLabel()
-        makeLivesLabel()
-        physicsWorld.contactDelegate = self
-        self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
-        ball.physicsBody?.isDynamic = true
-        ball.physicsBody?.applyImpulse(CGVector(dx: 3, dy: 5))
+        beginPlay()
     }
     
     func createBackGround(){
@@ -53,7 +45,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func makeBall() {
-        ball = SKShapeNode(circleOfRadius: 10)
+        ball = SKShapeNode(circleOfRadius: 100)
         ball.position = CGPoint(x: frame.midX, y: frame.midY)
         ball.strokeColor = UIColor.black
         ball.fillColor = UIColor.yellow
@@ -116,23 +108,34 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for touch in touches {
-            let location = touch.location(in: self)
-            paddle.position.x = location.x
+        if(playing){
+            for touch in touches {
+                let location = touch.location(in: self)
+                paddle.position.x = location.x
+            }
+            if(ball.speed <= 0.0){
+                ball.speed = 1.0
+                ball.physicsBody?.applyImpulse(CGVector(dx: 3, dy: 5))
+            }
+            if(ball.speed <= 2.0){
+                ball.speed = 5.0
+            }
         }
-        if(ball.speed <= 0.0){
-            ball.speed = 1.0
-            ball.physicsBody?.applyImpulse(CGVector(dx: 3, dy: 5))
-        }
-        if(ball.speed <= 2.0){
-            ball.speed = 5.0
+        else{
+            playing = true
+            beginPlay()
         }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for touch in touches {
-            let location = touch.location(in: self)
-            paddle.position.x = location.x
+        if(playing){
+            for touch in touches {
+                let location = touch.location(in: self)
+                paddle.position.x = location.x
+            }
+        }
+        else{
+            beginPlay()
         }
     }
     
@@ -151,7 +154,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     i.color = colors[brickValues[i]!]
                 }
                 if(score == originalBricks){
-                    print("You win!")
+                    setResultNode(message: "You win! Click to play again")
+                    playing = false
                 }
             }
         }
@@ -161,7 +165,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             if(lives == 1){
                 lives -= 1
                 resetLivesLabel()
-                print("You lose!")
+                setResultNode(message: "You lose! Click to play again")
+                playing = false
                 ball.removeFromParent()
             }
             else{
@@ -196,6 +201,29 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func resetLivesLabel(){
         livesLabel.text = "Lives: \(lives)"
+    }
+    
+    func beginPlay(){
+        self.removeAllChildren()
+        createBackGround()
+        makeBall()
+        makePaddle()
+        makeBricks()
+        makeLoseZone()
+        makeScoreLabel()
+        makeLivesLabel()
+        physicsWorld.contactDelegate = self
+        self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
+        ball.physicsBody?.isDynamic = true
+        ball.physicsBody?.applyImpulse(CGVector(dx: 3, dy: 5))
+    }
+ 
+    func setResultNode(message: String){
+        resultLabel.text = message
+        resultLabel.fontSize = 36
+        resultLabel.fontColor = .white
+        resultLabel.position = CGPoint(x: 0, y: 0)
+        addChild(resultLabel)
     }
     
 }
