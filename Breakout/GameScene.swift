@@ -17,10 +17,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var loseZone = SKSpriteNode()
     var scoreLabel = SKLabelNode()
     var livesLabel = SKLabelNode()
+    var brickValues = [SKSpriteNode: Int]()
     var score = 0
     var lives = 3
     var originalBricks = 0
-    
+    var colors = [UIColor.blue, UIColor.green, UIColor.yellow]
     
     override func didMove(to view: SKView) {
         createBackGround()
@@ -97,6 +98,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 brick.physicsBody = SKPhysicsBody(rectangleOf: brick.size)
                 brick.physicsBody?.isDynamic = false
                 bricks.append(brick)
+                brickValues[brick] = i
+                brick.color = colors[i]
                 addChild(brick)
             }
         }
@@ -137,10 +140,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         for i in bricks{
             if (contact.bodyA.node)! == i ||
                 (contact.bodyB.node)! == i {
-                i.removeFromParent()
-                bricks.remove(at: bricks.index(of: i)!)
-                score += 1
-                resetScoreLabel()
+                if(brickValues[i] == 0){
+                    i.removeFromParent()
+                    bricks.remove(at: bricks.index(of: i)!)
+                    score += 1
+                    resetScoreLabel()
+                }
+                else{
+                    brickValues[i]! -= 1
+                    i.color = colors[brickValues[i]!]
+                }
                 if(score == originalBricks){
                     print("You win!")
                 }
@@ -158,7 +167,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             else{
                 lives -= 1
                 resetLivesLabel()
-                [ball .run(SKAction .move(to: CGPoint(x: 0, y: 0), duration: 0.0))]
+                ball.run(SKAction .move(to: CGPoint(x: 0, y: 0), duration: 0.0))
             }
         }
     } 
