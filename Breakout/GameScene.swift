@@ -15,6 +15,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var paddle = SKSpriteNode()
     var bricks = [SKSpriteNode]()
     var loseZone = SKSpriteNode()
+    var scoreLabel = SKLabelNode()
     var score = 0
     var originalBricks = 0
     
@@ -24,6 +25,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         makePaddle()
         makeBricks()
         makeLoseZone()
+        makeScoreLabel()
         physicsWorld.contactDelegate = self
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
         ball.physicsBody?.isDynamic = true
@@ -131,6 +133,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 i.removeFromParent()
                 bricks.remove(at: bricks.index(of: i)!)
                 score += 1
+                resetScoreLabel()
                 if(score == originalBricks){
                     print("You win!")
                 }
@@ -143,5 +146,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             ball.removeFromParent()
         }
     } 
+    
+    func makeScoreLabel(){
+        scoreLabel.text = "Score: 0"
+        scoreLabel.position = CGPoint(x: frame.maxX - 64, y: frame.minY + 20)
+        scoreLabel.fontSize = 28
+        scoreLabel.color = .yellow
+        scoreLabel.fontColor = .black
+        addChild(scoreLabel)
+    }
+    
+    func resetScoreLabel(){
+        scoreLabel.text = "Score: \(score)"
+    }
     
 }
