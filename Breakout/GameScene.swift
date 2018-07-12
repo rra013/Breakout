@@ -15,6 +15,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var paddle = SKSpriteNode()
     var bricks = [SKSpriteNode]()
     var loseZone = SKSpriteNode()
+    var score = 0
+    var originalBricks = 0
     
     override func didMove(to view: SKView) {
         createBackGround()
@@ -83,7 +85,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let layerCount = 3
         for i in 0..<layerCount{
             for j in 0..<brickCount{
-                var brick = SKSpriteNode(color: UIColor.blue, size: CGSize(width: 50, height: 20))
+                let brick = SKSpriteNode(color: UIColor.blue, size: CGSize(width: 50, height: 20))
                 brick.position = CGPoint(x: CGFloat(Int(frame.minX) + (60 + 60 * j)), y: CGFloat(Int(frame.maxY) - 30*(i+1)))
                 brick.name = "brick\(i)\(j)"
                 brick.physicsBody = SKPhysicsBody(rectangleOf: brick.size)
@@ -92,6 +94,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 addChild(brick)
             }
         }
+        originalBricks = bricks.count
     }
 
     func makeLoseZone() {
@@ -108,6 +111,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let location = touch.location(in: self)
             paddle.position.x = location.x
         }
+        if(ball.speed <= 0.0){
+            ball.speed = 1.0
+            ball.physicsBody?.applyImpulse(CGVector(dx: 3, dy: 5))
+        }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -123,6 +130,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 (contact.bodyB.node)! == i {
                 i.removeFromParent()
                 bricks.remove(at: bricks.index(of: i)!)
+                score += 1
+                if(score == originalBricks){
+                    print("You win!")
+                }
             }
         }
         
