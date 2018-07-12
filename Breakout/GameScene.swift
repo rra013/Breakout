@@ -16,8 +16,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var bricks = [SKSpriteNode]()
     var loseZone = SKSpriteNode()
     var scoreLabel = SKLabelNode()
+    var livesLabel = SKLabelNode()
     var score = 0
+    var lives = 3
     var originalBricks = 0
+    
     
     override func didMove(to view: SKView) {
         createBackGround()
@@ -26,6 +29,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         makeBricks()
         makeLoseZone()
         makeScoreLabel()
+        makeLivesLabel()
         physicsWorld.contactDelegate = self
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
         ball.physicsBody?.isDynamic = true
@@ -117,6 +121,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             ball.speed = 1.0
             ball.physicsBody?.applyImpulse(CGVector(dx: 3, dy: 5))
         }
+        if(ball.speed <= 2.0){
+            ball.speed = 5.0
+        }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -142,8 +149,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         if contact.bodyA.node?.name == "loseZone" ||
             contact.bodyB.node?.name == "loseZone" {
-            print("You lose!")
-            ball.removeFromParent()
+            if(lives == 1){
+                lives -= 1
+                resetLivesLabel()
+                print("You lose!")
+                ball.removeFromParent()
+            }
+            else{
+                lives -= 1
+                resetLivesLabel()
+                [ball .run(SKAction .move(to: CGPoint(x: 0, y: 0), duration: 0.0))]
+            }
         }
     } 
     
@@ -152,12 +168,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         scoreLabel.position = CGPoint(x: frame.maxX - 64, y: frame.minY + 20)
         scoreLabel.fontSize = 28
         scoreLabel.color = .yellow
-        scoreLabel.fontColor = .black
+        scoreLabel.fontColor = .green
         addChild(scoreLabel)
     }
     
     func resetScoreLabel(){
         scoreLabel.text = "Score: \(score)"
+    }
+    
+    func makeLivesLabel(){
+        livesLabel.text = "Lives: \(lives)"
+        livesLabel.position = CGPoint(x: frame.minX + 64, y: frame.minY + 20)
+        livesLabel.fontSize = 28
+        livesLabel.color = .yellow
+        livesLabel.fontColor = .green
+        addChild(livesLabel)
+    }
+    
+    func resetLivesLabel(){
+        livesLabel.text = "Lives: \(lives)"
     }
     
 }
