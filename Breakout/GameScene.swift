@@ -13,14 +13,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var ball = SKShapeNode()
     var paddle = SKSpriteNode()
-    var brick = SKSpriteNode()
+    var bricks = [SKSpriteNode]()
     var loseZone = SKSpriteNode()
     
     override func didMove(to view: SKView) {
         createBackGround()
         makeBall()
         makePaddle()
-        makeBrick()
+        makeBricks()
         makeLoseZone()
         physicsWorld.contactDelegate = self
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
@@ -78,13 +78,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(paddle)
     }
     
-    func makeBrick() {
-        brick = SKSpriteNode(color: UIColor.blue, size: CGSize(width: 50, height: 20))
-        brick.position = CGPoint(x: frame.midX, y: frame.maxY - 30)
-        brick.name = "brick"
-        brick.physicsBody = SKPhysicsBody(rectangleOf: brick.size)
-        brick.physicsBody?.isDynamic = false
-        addChild(brick)
+    func makeBricks() {
+        let brickCount = Int(self.frame.width/60)
+        let layerCount = 3
+        for i in 0..<layerCount{
+            for j in 0..<brickCount{
+                var brick = SKSpriteNode(color: UIColor.blue, size: CGSize(width: 50, height: 20))
+                brick.position = CGPoint(x: CGFloat(Int(frame.minX) + (60 + 60 * j)), y: CGFloat(Int(frame.maxY) - 30*(i+1)))
+                brick.name = "brick\(i)\(j)"
+                brick.physicsBody = SKPhysicsBody(rectangleOf: brick.size)
+                brick.physicsBody?.isDynamic = false
+                bricks.append(brick)
+                addChild(brick)
+            }
+        }
     }
 
     func makeLoseZone() {
@@ -111,12 +118,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
-        if contact.bodyA.node?.name == "brick" ||
-            contact.bodyB.node?.name == "brick" {
-            print("You win!")
-            brick.removeFromParent()
-            ball.removeFromParent()
+        for i in bricks{
+            if (contact.bodyA.node)! == i ||
+                (contact.bodyB.node)! == i {
+                i.removeFromParent()
+                bricks.remove(at: bricks.index(of: i)!)
+            }
         }
+        
         if contact.bodyA.node?.name == "loseZone" ||
             contact.bodyB.node?.name == "loseZone" {
             print("You lose!")
